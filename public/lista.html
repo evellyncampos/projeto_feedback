@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Feedbacks</title>
+    <style>
+        :root {
+            --azul-fundo: #eaf6fd;
+            --azul-claro: #bfe3f7;
+            --azul-medio: #8fcdee;
+            --azul-borda: #a9d6ef;
+            --azul-texto: #12344d;
+            --branco: #ffffff;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            padding: 2rem 1rem;
+            background: var(--azul-fundo);
+            color: var(--azul-texto);
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.5;
+        }
+
+        main {
+            max-width: 560px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            margin: 0 0 1.25rem;
+            font-size: 1.75rem;
+        }
+
+        ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        li {
+            margin-bottom: 1rem;
+            padding: 1rem 1.25rem;
+            background: var(--branco);
+            border: 1px solid var(--azul-borda);
+            border-left: 6px solid var(--azul-medio);
+            border-radius: 12px;
+        }
+
+        li strong {
+            font-size: 1.05rem;
+        }
+
+        li p {
+            margin: 0.4rem 0 0.9rem;
+            overflow-wrap: anywhere;
+        }
+
+        li form { margin: 0; }
+
+        button {
+            padding: 0.4rem 0.9rem;
+            background: var(--azul-claro);
+            border: 1px solid var(--azul-medio);
+            border-radius: 8px;
+            color: var(--azul-texto);
+            font: inherit;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        button:hover { background: var(--azul-medio); }
+
+        button:focus-visible {
+            outline: 3px solid var(--azul-texto);
+            outline-offset: 2px;
+        }
+
+        #mensagem-vazia {
+            padding: 1rem 1.25rem;
+            background: var(--branco);
+            border: 1px dashed var(--azul-medio);
+            border-radius: 12px;
+        }
+
+        #mensagem-vazia[hidden] { display: none; }
+
+        a {
+            color: #0b5a8a;
+            font-weight: 600;
+        }
+
+        a:hover { background: var(--azul-claro); }
+    </style>
+</head>
+<body>
+    <main>
+        <h1>Feedbacks recebidos</h1>
+
+        <ul id="lista-feedbacks"></ul>
+
+        <p id="mensagem-vazia" hidden>
+            Nenhum feedback enviado ainda
+        </p>
+
+        <p>
+            <a href="/">Enviar outro feedback</a>
+        </p>
+    </main>
+
+    <script>
+        async function carregarFeedbacks() {
+            const resposta = await fetch('/feedbacks/dados');
+            const feedbacks = await resposta.json();
+
+            const lista = document.getElementById('lista-feedbacks');
+            const mensagem = document.getElementById('mensagem-vazia');
+
+            lista.replaceChildren();
+            mensagem.hidden = feedbacks.length > 0;
+
+            feedbacks.forEach(feedback => {
+                const item = document.createElement('li');
+                const autor = document.createElement('strong');
+                const comentario = document.createElement('p');
+                const formulario = document.createElement('form');
+                const campoId = document.createElement('input');
+                const botao = document.createElement('button');
+
+                autor.textContent = feedback.nome;
+                comentario.textContent = feedback.comentario;
+
+                formulario.action = '/feedbacks/remover';
+                formulario.method = 'POST';
+
+                campoId.type = 'hidden';
+                campoId.name = 'id';
+                campoId.value = feedback.id;
+
+                botao.type = 'submit';
+                botao.textContent = 'Remover';
+
+                formulario.append(campoId, botao);
+                item.append(autor, comentario, formulario);
+                lista.appendChild(item);
+            });
+        }
+
+        carregarFeedbacks();
+    </script>
+</body>
+</html>
